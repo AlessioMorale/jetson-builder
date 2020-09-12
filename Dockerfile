@@ -9,7 +9,7 @@ RUN ln -fs /usr/share/zoneinfo/Europe/London /etc/localtime && \
 
 # install the base environment and all build tools
 RUN apt-get update && \
-    apt-get install build-essential cmake git python3-pip python3 python3-dev -y --no-install-recommends && \
+    apt-get install build-essential ninja-build cmake git python3-pip python3 python3-dev -y --no-install-recommends && \
     apt-get clean autoclean -y
 
 # install cuda build tools
