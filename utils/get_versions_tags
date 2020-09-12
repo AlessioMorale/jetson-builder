@@ -1,0 +1,11 @@
+# naming for the docker image to be generated
+export base_name=alessiomorale/jetson-builder
+export base_tag=r32.4.2-cv-4.3.0-py3
+
+# retrieve the version from git
+last_git_tag=$(git describe --tags --dirty=-d --abbrev=1 --first-parent)
+last_git_tag=${last_git_tag:-$(git describe --all --dirty=-d --abbrev=1 --first-parent)}
+last_git_tag=${last_git_tag/\//_}
+# complete image tag 
+export docker_tag=${base_name}:${base_tag}_${last_git_tag}
+echo $docker_tag
