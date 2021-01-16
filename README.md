@@ -1,8 +1,8 @@
 # jetson-ros-dockers: jetson-builder
 A docker container to be used as base builder image for L4T/arm64
-Contains build-esentials python3, python-opencv
+Contains build-esentials python3 and CUDA compiler/libraries
 To build the repository on an amd64 workstation you can use the following script.
-Check the blog post [Running Docker Containers for the NVIDIA Jetson Nano](https://dev.to/caelinsutch/running-docker-containers-for-the-nvidia-jetson-nano-5a06) for more info.
+
 
 ```bash
 #Configure docker for Nvidia
@@ -26,5 +26,6 @@ To run interactively the builder image you can use the following sintax:
 ```bash
 docker run -it --rm --net=host --runtime nvidia -e DISPLAY=$DISPLAY alessiomorale/jetson-builder-jp-r32.4.2-cv-4.3.0-py3
 ```
+Check the blog post [Running Docker Containers for the NVIDIA Jetson Nano](https://dev.to/caelinsutch/running-docker-containers-for-the-nvidia-jetson-nano-5a06) for more info.
 
-Images are based on [mdegans/tegra-opencv](https://github.com/mdegans/nano_build_opencv/tree/docker) 
+Images are based on [mdegans/l4t-base](https://github.com/mdegans/docker-tegra-ubuntu/tree/l4t-base) 

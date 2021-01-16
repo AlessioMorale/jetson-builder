@@ -1,0 +1,6 @@
+export image_name='alessiomorale/jetson-builder'
+export image_base_tag='r32.4.4'
+
+export base_image_name='registry.hub.docker.com/mdegans/l4t-base'
+export base_image_tag='r32.4.4'
+export base_image=$base_image_name:$base_image_tag

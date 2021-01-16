@@ -1,4 +1,7 @@
 #!/bin/bash
+set -ex
+source ./environment
 source ./utils/get_versions_tags
 echo building $docker_tag
-docker build -t $docker_tag .
+docker pull $docker_latest | true
+docker build -t $docker_tag -t $docker_latest --build-arg source_image=$base_image  .
