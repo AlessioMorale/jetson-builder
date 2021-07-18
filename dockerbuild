@@ -3,6 +3,5 @@ set -ex
 source ./environment
 echo building $docker_tag
 docker pull $base_image
-docker pull $docker_latest | true
 
-docker build -t $docker_tag -t $docker_latest --build-arg source_image=$base_image  .
+docker build -t $docker_tag -t $docker_latest --build-arg RELEASE=${releaase} --build-arg source_image=${base_image} .

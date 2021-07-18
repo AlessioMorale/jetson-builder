@@ -1,10 +1,10 @@
 #image to be built
 export image_name='alessiomorale/jetson-builder'
-export image_base_tag='r32.4.4'
-
+export image_base_tag='r32.5.0'
+export releaase='r32.5'
 #base image
-export base_image_name='registry.hub.docker.com/mdegans/l4t-base'
-export base_image_tag='r32.4.4'
+export base_image_name='nvcr.io/nvidia/l4t-base'
+export base_image_tag='r32.5.0'
 
 
 #full base image name
