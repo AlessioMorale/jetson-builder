@@ -1,5 +1,5 @@
 #!/bin/bash
-ccachedir=/ccache
+ccachedir=${CCACHE_DIR:-"/ccache"}
 archive_folder=/root/ccache_archives
 
 if [ -n "$CACHE_GIT_URL" ]; then
@@ -19,9 +19,25 @@ max_size = 768M
 cache_dir = ${ccachedir}
 EOT
 
+function test_cache() {
+cat << EOT > ~/test.c
+#include <stdio.h>
+
+int main (void) {
+  printf ("`openssl rand -base64 16`");
+  return 0;
+}
+EOT
+echo testing ccache setup
+c++ -c -Wall -g ~/test.c
+rm test.o ~/test.c
+echo ccache test passed
+ccache -s
+}
+
 function upload_cache {
     pushd /
-    ccache -s
+    ccache -s | tee "${archive_folder}/after_stats.txt"
     
     rm "${archive_folder}/${CACHE_ARCHIVE}" || true
 
@@ -37,24 +53,31 @@ function upload_cache {
     rm -rf "${archive_folder}" 
 }
 
+function fix_permissions {
+    chmod ugo+rwx ${ccachedir}
+    find ${ccachedir} -type d -exec chmod ugo+rwx {} \;
+    find ${ccachedir} -type f -exec chmod ugo+rw {} \;
+}
+
 function download_cache {
     pushd /root
     git clone --depth 1 "${CACHE_GIT_URL}" -b "${CACHE_BRANCH}" "${archive_folder}"
     cd "${archive_folder}"
     git config user.email none@buildsandbox
     git config user.name "CI"
-
+    echo ${ccachedir}
     mkdir -p ${ccachedir}
-    rm -rf "${ccachedir:?}/*"
     if [ -f "${archive_folder}/${CACHE_ARCHIVE}" ]; then
-        echo expand the cache
+        echo expand the cache content
         cd ${ccachedir}/..
         tar -xvf "${archive_folder}/${CACHE_ARCHIVE}"
+        fix_permissions
     fi
     cp /etc/ccache.conf ${ccachedir}
-    chmod -R a+rwX ${ccachedir}
-    ccache -s
+    ccache -s | tee "${archive_folder}/before_stats.txt"
     popd
+    test_cache
+    fix_permissions
 }
 
 function remove_cache {
