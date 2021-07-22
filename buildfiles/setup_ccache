@@ -4,15 +4,6 @@ archive_folder=/root/ccache_archives
 
 if [ -n "$CACHE_GIT_URL" ]; then
 
-    if ! ccache --version >/dev/null 2>&1; then
-        apt-get update
-        apt-get install -y ccache --no-install-recommends
-        apt-get clean autoclean -y
-    else
-        echo ccache already installed
-        ccache --version
-    fi
-
 cat << EOT >> /etc/ccache.conf
 # Set maximum cache size and location:
 max_size = 768M
@@ -33,6 +24,32 @@ c++ -c -Wall -g ~/test.c
 rm test.o ~/test.c
 echo ccache test passed
 ccache -s
+}
+
+function upgrade_ccache {
+    apt-get update
+    apt-get install -y libzstd-dev --no-install-recommends
+    apt-get clean autoclean -y
+
+    mkdir -p /tmp/ccache_build
+    cd /tmp/ccache_build
+    git clone --branch v4.3 https://github.com/ccache/ccache.git ccache
+    mkdir -p ccache/build
+    cd ccache/build
+
+    cmake \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_INSTALL_SYSCONFDIR=/etc \
+    -DREDIS_STORAGE_BACKEND=OFF \
+    -DENABLE_TESTING=OFF \
+    -DENABLE_DOCUMENTATION=OFF \
+    ..
+
+    make -j8
+    make install
+    
+    rm -rf /tmp/ccache_build
 }
 
 function upload_cache {
@@ -87,6 +104,8 @@ function remove_cache {
 
 /usr/sbin/update-ccache-symlinks
 export PATH="/usr/lib/ccache:$PATH"
+[ -e "/usr/lib/ccache/nvcc" ] && rm "/usr/lib/ccache/nvcc"
+ln -s $(which ccache) /usr/lib/ccache/nvcc
 
 else
 

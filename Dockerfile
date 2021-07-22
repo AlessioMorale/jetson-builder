@@ -17,7 +17,7 @@ RUN ln -fs /usr/share/zoneinfo/Europe/London /etc/localtime && \
 
 # install the base environment and all build tools
 RUN apt-get update && \
-    apt-get install build-essential ninja-build cmake git python3 python3-dev python3-pip ccache -y --no-install-recommends && \
+    apt-get install build-essential ninja-build cmake git python3 python3-dev python3-pip -y --no-install-recommends && \
     apt-get clean autoclean -y
 
 ARG CUDA_VERSION=10-2
@@ -30,4 +30,9 @@ RUN apt-get install cuda-libraries-${CUDA_VERSION} cuda-libraries-dev-${CUDA_VER
 
 SHELL ["/bin/bash", "-c"]
 COPY ./buildfiles/* /root/
-RUN source /root/setup_ccache
+env CACHE_GIT_URL=dummy
+RUN apt-get update && \
+    apt-get install -y ccache --no-install-recommends && \
+    apt-get clean autoclean -y && \
+    source /root/setup_ccache && \
+    upgrade_ccache
