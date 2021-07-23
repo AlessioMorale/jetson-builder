@@ -30,9 +30,27 @@ RUN apt-get install cuda-libraries-${CUDA_VERSION} cuda-libraries-dev-${CUDA_VER
 
 SHELL ["/bin/bash", "-c"]
 COPY ./buildfiles/* /root/
-env CACHE_GIT_URL=dummy
+
 RUN apt-get update && \
     apt-get install -y ccache --no-install-recommends && \
-    apt-get clean autoclean -y && \
-    source /root/setup_ccache && \
-    upgrade_ccache
+    apt-get install -y libzstd-dev --no-install-recommends && \
+    apt-get clean autoclean -y
+
+# Upgrade CCACHE to a version supporting NVCC
+RUN mkdir -p /tmp/ccache_build && \
+    cd /tmp/ccache_build && \
+    git clone --branch v4.3 https://github.com/ccache/ccache.git ccache && \
+    mkdir -p ccache/build && \
+    cd ccache/build && \
+    cmake \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_INSTALL_SYSCONFDIR=/etc \
+    -DREDIS_STORAGE_BACKEND=OFF \
+    -DENABLE_TESTING=OFF \
+    -DENABLE_DOCUMENTATION=OFF \
+    .. && \
+    make -j8 && \
+    make install && \
+    rm -rf /tmp/ccache_build && \
+    ccache --version
