@@ -24,15 +24,18 @@ function upload_cache {
     pushd /
     
     [ ! -d ${archive_folder} ] && prepare_git_clone
+    cd "${archive_folder}"
+
+    # save a backup copy of the previous run
+    git push origin "${CACHE_BRANCH}":"${CACHE_BRANCH}_prev" -f
 
     ccache -s | tee "${archive_folder}/after_stats.txt"
 
-    mv "${archive_folder}/${CACHE_ARCHIVE}" "${archive_folder}/prev_${CACHE_ARCHIVE}"
+    rm ${CACHE_ARCHIVE}*
 
-    tar -czSf "${archive_folder}/${CACHE_ARCHIVE}" --directory=${ccachedir}/.. ccache
-    
+    tar --owner=0 --group=0 -czSf - --directory=${ccachedir}/.. ccache | split --bytes 49M - "${archive_folder}/${CACHE_ARCHIVE}".
+
     echo uploading
-    cd "${archive_folder}"
     git add .
     git commit --amend -m "update data"
     git push origin "${CACHE_BRANCH}":"${CACHE_BRANCH}" -f
@@ -50,7 +53,7 @@ function download_cache {
         echo expand the cache content
         rm -rf ${ccachedir}/* 
         cd ${ccachedir}/..
-        tar -xf "${archive_folder}/${CACHE_ARCHIVE}" > /dev/null
+        cat "${archive_folder}/${CACHE_ARCHIVE}."* | tar xzf -
         [ -f "${ccachedir}/ccache.conf" ] && rm ${ccachedir}/ccache.conf
     fi
     ccache -s | tee "${archive_folder}/before_stats.txt"
