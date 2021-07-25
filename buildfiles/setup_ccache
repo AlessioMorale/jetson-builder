@@ -22,7 +22,7 @@ function prepare_git_clone {
 
 function upload_cache {
     pushd /
-    
+
     [ ! -d ${archive_folder} ] && prepare_git_clone
     cd "${archive_folder}"
 
@@ -49,7 +49,7 @@ function download_cache {
 
     echo ${ccachedir}
     mkdir -p ${ccachedir}
-    if [ -f "${archive_folder}/${CACHE_ARCHIVE}" ]; then
+    if [ -f "${archive_folder}/${CACHE_ARCHIVE}.aa" ]; then
         echo expand the cache content
         rm -rf ${ccachedir}/* 
         cd ${ccachedir}/..
